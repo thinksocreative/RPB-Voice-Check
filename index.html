@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RPB Brand Copy Reviewer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; background: #f4f5f7; color: #222; min-height: 100vh; padding: 2rem 1rem; }
+  .wrap { max-width: 740px; margin: 0 auto; }
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+  .logo { width: 40px; height: 40px; border-radius: 8px; background: #00497C; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .header h1 { font-size: 20px; font-weight: 600; color: #111; }
+  .header p { font-size: 13px; color: #666; margin-top: 2px; }
+  .card { background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .selects { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media (max-width: 560px) { .selects { grid-template-columns: 1fr; } }
+  label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; }
+  select, textarea { width: 100%; font-family: inherit; font-size: 14px; border: 1px solid #ccc; border-radius: 8px; padding: 8px 10px; background: #fafafa; color: #222; outline: none; }
+  select:focus, textarea:focus { border-color: #00497C; box-shadow: 0 0 0 2px rgba(0,73,124,0.12); }
+  textarea { min-height: 140px; resize: vertical; line-height: 1.6; }
+  .btn-row { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .btn-primary { padding: 9px 22px; font-size: 14px; font-weight: 600; background: #00497C; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+  .btn-primary:hover { background: #003a63; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { padding: 8px 16px; font-size: 13px; background: transparent; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; color: #555; transition: background 0.15s; }
+  .btn-secondary:hover { background: #f0f0f0; }
+  .btn-pdf { padding: 8px 16px; font-size: 13px; font-weight: 600; background: #00497C; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+  .btn-pdf:hover { background: #003a63; }
+  .error { color: #a32d2d; font-size: 13px; margin-bottom: 1rem; background: #fcebeb; border-radius: 8px; padding: 10px 14px; }
+  .score-row { display: flex; align-items: center; gap: 14px; margin-bottom: 1rem; }
+  .score-box { display: inline-flex; align-items: baseline; gap: 4px; padding: 10px 18px; border-radius: 8px; flex-shrink: 0; }
+  .score-num { font-size: 30px; font-weight: 700; }
+  .score-denom { font-size: 15px; }
+  .verdict { font-size: 14px; color: #444; line-height: 1.5; }
+  .strengths { background: #E1F5EE; border-radius: 8px; padding: 10px 14px; margin-bottom: 1rem; }
+  .strengths p.label { font-size: 12px; font-weight: 600; color: #0F6E56; margin-bottom: 6px; }
+  .strengths p.item { font-size: 13px; color: #085041; margin: 3px 0; }
+  .tabs { display: flex; border-bottom: 1px solid #e0e0e0; margin-bottom: 0; }
+  .tab { padding: 8px 16px; font-size: 13px; background: transparent; border: none; border-bottom: 2px solid transparent; cursor: pointer; color: #888; font-family: inherit; }
+  .tab.active { color: #00497C; border-bottom-color: #00497C; font-weight: 600; }
+  .tab-content { padding-top: 12px; display: none; }
+  .tab-content.active { display: block; }
+  .issue { background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+  .issue-tags { display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .tag.major { background: #FCEBEB; color: #A32D2D; }
+  .tag.minor { background: #FAEEDA; color: #BA7517; }
+  .tag.cat { background: #f0f0f0; color: #555; font-weight: 400; }
+  .issue-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .issue-detail { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 8px; }
+  .suggestion { background: #f4f8fc; border-left: 3px solid #00497C; padding: 8px 10px; border-radius: 0 6px 6px 0; }
+  .suggestion .sug-label { font-size: 11px; color: #666; margin-bottom: 3px; font-weight: 600; }
+  .suggestion p { font-size: 13px; color: #222; line-height: 1.5; }
+  .revised-box { background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1rem 1.25rem; }
+  .revised-box .rev-label { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .revised-box .rev-text { font-size: 14px; line-height: 1.7; white-space: pre-wrap; color: #222; }
+  .action-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e0e0e0; }
+  .no-issues { font-size: 14px; color: #666; padding: 1rem 0; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">RPB</div>
+    <div>
+      <h1>Brand copy reviewer</h1>
+      <p>Checks copy against RPB's brand guidelines</p>
+    </div>
+  </div>
+
+  <div id="form-section">
+    <div class="card">
+      <div class="selects">
+        <div>
+          <label for="content-type">Content type</label>
+          <select id="content-type">
+            <option value="general">General / About RPB</option>
+            <option value="investment">Investment materials</option>
+            <option value="wellness">Financial wellness</option>
+            <option value="enrollment">Enrollment / onboarding</option>
+            <option value="employer">Employer materials</option>
+            <option value="event">Event / webinar</option>
+          </select>
+        </div>
+        <div>
+          <label for="audience">Audience</label>
+          <select id="audience">
+            <option value="participant">Participants / members</option>
+            <option value="employer">Employers</option>
+            <option value="professional">Professional organizations</option>
+          </select>
+        </div>
+        <div>
+          <label for="comm-type">Communication type</label>
+          <select id="comm-type">
+            <option value="educational">Educational</option>
+            <option value="transactional">Transactional</option>
+            <option value="promotional">Promotional</option>
+          </select>
+        </div>
+      </div>
+      <label for="copy-input">Paste your copy</label>
+      <textarea id="copy-input" placeholder="Paste the copy you'd like to review here..."></textarea>
+      <div class="btn-row">
+        <button class="btn-primary" id="review-btn" onclick="reviewCopy()">Review copy</button>
+      </div>
+    </div>
+    <div id="error-box" class="error" style="display:none"></div>
+  </div>
+
+  <div id="results-section" style="display:none">
+    <div class="score-row">
+      <div class="score-box" id="score-box">
+        <span class="score-num" id="score-num"></span>
+        <span class="score-denom" id="score-denom">/ 10</span>
+      </div>
+      <p class="verdict" id="verdict-text"></p>
+    </div>
+    <div class="strengths" id="strengths-box" style="display:none">
+      <p class="label">What's working</p>
+      <div id="strengths-list"></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('issues')" id="tab-issues">Issues</button>
+      <button class="tab" onclick="switchTab('revised')" id="tab-revised">Revised copy</button>
+    </div>
+    <div class="tab-content active" id="panel-issues">
+      <div id="issues-list"></div>
+    </div>
+    <div class="tab-content" id="panel-revised">
+      <div class="revised-box">
+        <p class="rev-label">Revised version</p>
+        <p class="rev-text" id="revised-text"></p>
+      </div>
+    </div>
+    <div class="action-row">
+      <button class="btn-secondary" onclick="startNew()">Start new review</button>
+      <button class="btn-pdf" onclick="downloadPDF()">Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MESSAGING_HIERARCHY = {
+  general: `MESSAGING HIERARCHY (full hierarchy applies):
+- Primary: RPB is dedicated to those who've dedicated their lives to the Reform Movement
+- Secondary differentiators: Jewish Values Investing, supports the Reform Movement, Reform Jewish Values Fund, church plan/parsonage tax benefits, portability, financial wellness curator
+- Tertiary (table stakes, less emphasis): 75+ year track record, investment options on par with major institutions, Fidelity access, investment tiers
+Check that the copy leads with RPB's differentiating mission and values, not generic financial services messaging.`,
+
+  investment: `MESSAGING HIERARCHY (investment materials):
+This is an investment-focused piece, so investment content appropriately leads. Do NOT flag investment information as wrong emphasis.
+- Primary for this content type: Investment quality, fund options, performance approach, Jewish Values Investing Policy (JVI), Reform Jewish Values Fund
+- Secondary: How investments connect to RPB's values and mission, RPB's fiduciary commitment, no shareholders/no products to push
+- Tertiary: General RPB differentiators (these support but don't need to lead)
+Check that investment information is accurate in tone, that JVI Policy is named correctly, and that the copy doesn't oversell or make inappropriate performance claims.`,
+
+  wellness: `MESSAGING HIERARCHY (financial wellness materials):
+This is financial education content, so the educational topic leads. Do NOT flag the topic emphasis as wrong.
+- Primary for this content type: The financial wellness topic itself (the lesson, the concept, the actionable guidance)
+- Secondary: RPB's role as curator/sage — framing RPB as a trusted guide providing this education
+- Tertiary: RPB plan specifics (these can be mentioned but shouldn't dominate)
+Check that the educational content is clear, accessible, and empowering rather than anxiety-inducing.`,
+
+  enrollment: `MESSAGING HIERARCHY (enrollment/onboarding materials):
+This is action-oriented content guiding someone through a process. Do NOT flag practical step-by-step content as wrong emphasis.
+- Primary for this content type: Clear next steps, what the participant needs to do, and why it matters for their future
+- Secondary: Warm welcome, RPB's commitment to the participant's retirement journey
+- Tertiary: Broader RPB differentiators (these can appear but shouldn't interrupt the flow)
+Check that steps are clear, the tone is encouraging not bureaucratic, and the reader always knows what to do next.`,
+
+  employer: `MESSAGING HIERARCHY (employer-only materials):
+This is employer-facing content. Do NOT apply participant messaging standards here.
+- Primary for this content type: Ease of plan administration, how RPB supports employers, employee benefit value, what employers need to do
+- Secondary: RPB as a partner, the plan as a recruiting/retention tool, RPB's responsiveness and support
+- Tertiary: General RPB mission messaging (supports but doesn't lead)
+Tone should be partnership-oriented and collaborative — more technical but still clear and approachable. Check that administrative instructions are clear and actionable.`,
+
+  event: `MESSAGING HIERARCHY (event/webinar materials):
+This is promotional event content. The event topic leads. Do NOT flag topic-forward content as wrong emphasis.
+- Primary for this content type: The event topic, the value/benefit of attending, speakers and credentials, date/time/location
+- Secondary: RPB as trusted host and expert facilitator
+- Tertiary: General RPB differentiators (light touch only)
+Check that the event value proposition is clear, the CTA is compelling, and details are accurate and complete.`
+};
+
+const SYSTEM_PROMPT_TEMPLATE = `You are an expert brand reviewer for RPB (Reform Pension Board), a retirement plan provider serving clergy, professionals, educators, and staff of Reform Movement congregations and organizations. Your job is to review marketing copy against RPB's brand guidelines and return structured feedback.
+
+RPB BRAND OVERVIEW:
+- Tagline: "Invested in your future"
+- Positioning: Caring for those dedicated to caring for all of us.
+- Voice Persona: Rabbi Rebecca P. Bloom — warm, wise, compassionate, clever, accessible, expert but not condescending.
+- Brand Attributes: Caring, Expert, Empowering, Transparent, In-Touch, Warm & Accessible
+
+BRAND ROLE MODELS:
+- Caretaker: Transparent, communicative, in service to participants
+- Sage: Investment expertise, financial education
+- Curator: Quality over quantity, focused and succinct
+- Friend: Warm, accessible, builds trust
+
+VOICE CHARACTERISTICS:
+- Clear and plain-spoken: Flesch-Kincaid Grade Level ~8, short sentences, no jargon
+- Guiding and motivating: positive words, warm and authentic, avoid negative/wary tone
+- Personal and personable: use "you" for reader, "we" for RPB, avoid third person
+- Use contractions naturally; conversational, not corporate
+- Hebrew words sparingly (only for Jewish values concepts)
+- For participants: casual, friendly, supportive, uses personality/humor when appropriate
+- For employers: partnership-oriented, collaborative, more technical but still clear
+
+WHAT TO AVOID:
+- Corporate speak, financial jargon without explanation
+- Negative, earnest, or wary tone
+- Cheesy, cliché, or saccharine language
+- Third-person address to reader
+- Overuse of em-dashes
+- Generic statements (use specifics)
+- Overly complex sentences
+
+NOMENCLATURE RULES:
+- Say "RPB" not "the RPB" (only use "the" as adjective, e.g. "the RPB team")
+- Write out "Reform Pension Board" only for legal/historical contexts
+- Plan = "retirement plan" not "pension" or "pension plan"
+- Participants = "participants" not "employees," "members," or "investors"
+- Use "403(b)" or "defined contribution" to specify plan type
+- "Jewish Values Investing Policy" or "JVI Policy" (not "Reform Movement investing")
+- "Reform Jewish Values Fund" → "RJV Fund" after first use
+- "MyRPB" (no space, lowercase y)
+- Groups: RPB Board of Trustees, RPB Investment Committee (title case full name; lowercase shorthand)
+
+EDITORIAL STYLE:
+- Chicago Manual of Style (CMOS) as base
+- Use Oxford/serial comma
+- Em-dash: no spaces before/after (—)
+- En-dash: one space before/after (–), used for ranges
+- Dates: August 30, 2018 (not Aug 30, not August 30th)
+- Numbers: spell out one–nine; numerals for 10+
+- Time: 10 a.m. – 12 p.m. (lowercase with periods)
+- Headline format: sentence case, first word only capitalized
+- Gender: use they/them/their for unspecified gender
+- Contractions: use them naturally
+- "Invested in your future™" (trademark symbol when tagline is used)
+
+{MESSAGING_HIERARCHY}
+
+Your response must be a valid JSON object with exactly this structure:
+{
+  "overallScore": <number 1-10>,
+  "overallVerdict": "<one sentence summary>",
+  "strengths": ["<strength 1>", "<strength 2>", ...],
+  "issues": [
+    {
+      "severity": "major" | "minor",
+      "category": "<Voice & Tone | Messaging | Nomenclature | Editorial Style | Audience Alignment>",
+      "issue": "<brief description>",
+      "detail": "<specific explanation referencing the copy>",
+      "suggestion": "<specific fix or example rewrite of the problem phrase>"
+    }
+  ],
+  "revisedCopy": "<full revised version of the copy, correcting all issues while preserving the intent>"
+}
+
+Be specific. Quote the actual copy when identifying issues. The revised copy should feel like Rabbi Rebecca wrote it — warm, clear, human, and on-brand.`;
+
+let currentResult = null;
+
+function scoreColor(s) { return s >= 8 ? "#0F6E56" : s >= 6 ? "#BA7517" : "#A32D2D"; }
+function scoreBg(s) { return s >= 8 ? "#E1F5EE" : s >= 6 ? "#FAEEDA" : "#FCEBEB"; }
+
+async function reviewCopy() {
+  const copy = document.getElementById("copy-input").value.trim();
+  if (!copy) return;
+  const audience = document.getElementById("audience").value;
+  const commType = document.getElementById("comm-type").value;
+  const contentType = document.getElementById("content-type").value;
+  const btn = document.getElementById("review-btn");
+  const errBox = document.getElementById("error-box");
+  errBox.style.display = "none";
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Reviewing…';
+
+  const audienceLabel = audience === "participant" ? "Participants / Plan Members" : audience === "employer" ? "Employers" : "Professional Organization Members";
+  const commLabel = commType === "educational" ? "Educational" : commType === "transactional" ? "Transactional" : "Promotional";
+  const systemPrompt = SYSTEM_PROMPT_TEMPLATE.replace("{MESSAGING_HIERARCHY}", MESSAGING_HIERARCHY[contentType]);
+  const userMsg = `Please review the following RPB copy.\n\nAUDIENCE: ${audienceLabel}\nCOMMUNICATION TYPE: ${commLabel}\n\nCOPY TO REVIEW:\n${copy}`;
+
+  try {
+    const res = await fetch("/api/review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+    const clean = text.replace(/```json|```/g, "").trim();
+    currentResult = JSON.parse(clean);
+    renderResults(currentResult);
+  } catch(e) {
+    errBox.textContent = "Error: " + (e?.message || String(e));
+    errBox.style.display = "block";
+  }
+  btn.disabled = false;
+  btn.innerHTML = "Review copy";
+}
+
+function renderResults(r) {
+  const s = r.overallScore;
+  const sb = document.getElementById("score-box");
+  sb.style.background = scoreBg(s);
+  document.getElementById("score-num").style.color = scoreColor(s);
+  document.getElementById("score-denom").style.color = scoreColor(s);
+  document.getElementById("score-num").textContent = s;
+  document.getElementById("verdict-text").textContent = r.overallVerdict;
+
+  const strBox = document.getElementById("strengths-box");
+  const strList = document.getElementById("strengths-list");
+  if (r.strengths && r.strengths.length) {
+    strList.innerHTML = r.strengths.map(s => `<p class="item">✓ ${s}</p>`).join("");
+    strBox.style.display = "block";
+  } else { strBox.style.display = "none"; }
+
+  const issuesList = document.getElementById("issues-list");
+  document.getElementById("tab-issues").textContent = `Issues (${(r.issues||[]).length})`;
+  if (!r.issues || r.issues.length === 0) {
+    issuesList.innerHTML = '<p class="no-issues">No issues found — this copy is on brand!</p>';
+  } else {
+    issuesList.innerHTML = r.issues.map(iss => `
+      <div class="issue">
+        <div class="issue-tags">
+          <span class="tag ${iss.severity}">${iss.severity}</span>
+          <span class="tag cat">${iss.category}</span>
+        </div>
+        <p class="issue-title">${iss.issue}</p>
+        <p class="issue-detail">${iss.detail}</p>
+        ${iss.suggestion ? `<div class="suggestion"><p class="sug-label">Suggestion</p><p>${iss.suggestion}</p></div>` : ""}
+      </div>`).join("");
+  }
+
+  document.getElementById("revised-text").textContent = r.revisedCopy;
+  document.getElementById("form-section").style.display = "none";
+  document.getElementById("results-section").style.display = "block";
+  switchTab("issues");
+}
+
+function switchTab(tab) {
+  document.getElementById("panel-issues").classList.toggle("active", tab === "issues");
+  document.getElementById("panel-revised").classList.toggle("active", tab === "revised");
+  document.getElementById("tab-issues").classList.toggle("active", tab === "issues");
+  document.getElementById("tab-revised").classList.toggle("active", tab === "revised");
+}
+
+function startNew() {
+  currentResult = null;
+  document.getElementById("copy-input").value = "";
+  document.getElementById("results-section").style.display = "none";
+  document.getElementById("form-section").style.display = "block";
+}
+
+function downloadPDF() {
+  if (!currentResult) return;
+  const r = currentResult;
+  const date = new Date().toLocaleDateString("en-US", {year:"numeric", month:"long", day:"numeric"});
+  const issueRows = (r.issues||[]).map(iss => `
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #eee;vertical-align:top">
+        <span style="display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;background:${iss.severity==="major"?"#FCEBEB":"#FAEEDA"};color:${iss.severity==="major"?"#A32D2D":"#BA7517"}">${iss.severity.toUpperCase()}</span>
+        <span style="display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;background:#f0f0f0;color:#555;margin-left:4px">${iss.category}</span>
+        <div style="font-weight:600;margin:5px 0 3px;font-size:13px">${iss.issue}</div>
+        <div style="font-size:12px;color:#555;margin-bottom:5px">${iss.detail}</div>
+        ${iss.suggestion ? `<div style="background:#f4f8fc;border-left:3px solid #00497C;padding:6px 8px;font-size:12px"><strong>Suggestion:</strong> ${iss.suggestion}</div>` : ""}
+      </td>
+    </tr>`).join("");
+  const strengthItems = (r.strengths||[]).map(s => `<li style="margin:3px 0;font-size:13px;color:#085041">${s}</li>`).join("");
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>RPB Brand Review</title>
+  <style>body{font-family:Arial,sans-serif;color:#222;margin:0;padding:0}
+  .page{max-width:740px;margin:0 auto;padding:40px}
+  h2{font-size:15px;font-weight:600;margin:20px 0 8px;color:#00497C}
+  table{width:100%;border-collapse:collapse}
+  .score-box{display:inline-flex;align-items:baseline;gap:6px;padding:10px 18px;border-radius:8px;background:${scoreBg(r.overallScore)}}
+  .revised{background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap}
+  </style></head><body><div class="page">
+  <table style="margin-bottom:24px"><tr>
+  <td><div style="width:40px;height:40px;background:#00497C;border-radius:8px;color:white;font-weight:700;font-size:13px;text-align:center;line-height:40px">RPB</div></td>
+  <td style="padding-left:12px"><h1 style="font-size:20px;margin:0">Brand copy review</h1><div style="font-size:12px;color:#888">Generated ${date}</div></td>
+  </tr></table>
+  <table style="margin-bottom:16px"><tr>
+  <td><div class="score-box"><span style="font-size:30px;font-weight:700;color:${scoreColor(r.overallScore)}">${r.overallScore}</span><span style="font-size:15px;color:${scoreColor(r.overallScore)}">/&nbsp;10</span></div></td>
+  <td style="padding-left:14px;font-size:14px;color:#444">${r.overallVerdict}</td>
+  </tr></table>
+  ${strengthItems ? `<h2>What's working</h2><ul style="margin:0;padding:10px 10px 10px 28px;background:#E1F5EE;border-radius:8px">${strengthItems}</ul>` : ""}
+  <h2>Issues (${(r.issues||[]).length})</h2>
+  <table>${issueRows}</table>
+  <h2>Revised copy</h2>
+  <div class="revised">${r.revisedCopy}</div>
+  <div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:11px;color:#aaa">RPB Brand Copy Reviewer</div>
+  </div></body></html>`;
+  const blob = new Blob([html], {type:"text/html"});
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, "_blank");
+  if (w) setTimeout(() => { w.print(); URL.revokeObjectURL(url); }, 800);
+}
+</script>
+</body>
+</html>
