@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RPB Brand Copy Reviewer</title>
+<title>VoiceCheck</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; background: #f4f5f7; color: #222; min-height: 100vh; padding: 2rem 1rem; }
@@ -66,7 +66,7 @@
   <div class="header">
     <div class="logo">RPB</div>
     <div>
-      <h1>Brand copy reviewer</h1>
+      <h1>VoiceCheck</h1>
       <p>Checks copy against RPB's brand guidelines</p>
     </div>
   </div>
@@ -378,7 +378,7 @@ function downloadPDF() {
       </td>
     </tr>`).join("");
   const strengthItems = (r.strengths||[]).map(s => `<li style="margin:3px 0;font-size:13px;color:#085041">${s}</li>`).join("");
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>RPB Brand Review</title>
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>VoiceCheck</title>
   <style>body{font-family:Arial,sans-serif;color:#222;margin:0;padding:0}
   .page{max-width:740px;margin:0 auto;padding:40px}
   h2{font-size:15px;font-weight:600;margin:20px 0 8px;color:#00497C}
@@ -388,10 +388,10 @@ function downloadPDF() {
   </style></head><body><div class="page">
   <table style="margin-bottom:24px"><tr>
   <td><div style="width:40px;height:40px;background:#00497C;border-radius:8px;color:white;font-weight:700;font-size:13px;text-align:center;line-height:40px">RPB</div></td>
-  <td style="padding-left:12px"><h1 style="font-size:20px;margin:0">Brand copy review</h1><div style="font-size:12px;color:#888">Generated ${date}</div></td>
+  <td style="padding-left:12px"><h1 style="font-size:20px;margin:0">VoiceCheck</h1><div style="font-size:12px;color:#888">Generated ${date}</div></td>
   </tr></table>
   <table style="margin-bottom:16px"><tr>
-  <td><div class="score-box"><span style="font-size:30px;font-weight:700;color:${scoreColor(r.overallScore)}">${r.overallScore}</span><span style="font-size:15px;color:${scoreColor(r.overallScore)}">/&nbsp;10</span></div></td>
+  <td><div class="score-box"><span style="font-size:30px;font-weight:700;color:${scoreColor(r.overallScore)}">${r.overallScore}</span><span style="font-size:15px;color:${scoreColor(r.overallScore)}">/ 10</span></div></td>
   <td style="padding-left:14px;font-size:14px;color:#444">${r.overallVerdict}</td>
   </tr></table>
   ${strengthItems ? `<h2>What's working</h2><ul style="margin:0;padding:10px 10px 10px 28px;background:#E1F5EE;border-radius:8px">${strengthItems}</ul>` : ""}
@@ -399,7 +399,7 @@ function downloadPDF() {
   <table>${issueRows}</table>
   <h2>Revised copy</h2>
   <div class="revised">${r.revisedCopy}</div>
-  <div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:11px;color:#aaa">RPB Brand Copy Reviewer</div>
+  <div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:11px;color:#aaa">VoiceCheck — RPB Brand Copy Reviewer</div>
   </div></body></html>`;
   const blob = new Blob([html], {type:"text/html"});
   const url = URL.createObjectURL(blob);
